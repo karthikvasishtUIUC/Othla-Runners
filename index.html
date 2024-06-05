@@ -48,44 +48,35 @@
   </div>
   
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyVgEMgNmmaCbQONu6lqnSrzvPHesBrwZzg9Fe-FmfxrjjJa95w0Kj6q5Hpkuiwa_B-/exec";
-    
     function submitData() {
       var runner = document.getElementById('runner').value;
       var date = document.getElementById('date').value;
       var distance = document.getElementById('distance').value;
       var steps = document.getElementById('steps').value;
       
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({runner, date, distance, steps}),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(response => response.json())
-        .then(data => {
-          alert('Data submitted!');
-          loadLeaderboard();
-        });
+      google.script.run.addRecord(runner, date, distance, steps);
+      alert('Data submitted!');
+      loadLeaderboard();
     }
     
     function loadLeaderboard() {
-      fetch(scriptURL)
-        .then(response => response.json())
-        .then(data => {
-          var tbody = document.getElementById('leaderboard').getElementsByTagName('tbody')[0];
-          tbody.innerHTML = '';
-          data.forEach(function(item) {
-            var row = tbody.insertRow();
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            cell1.innerHTML = item.name;
-            cell2.innerHTML = item.score.toFixed(2);
-          });
+      google.script.run.withSuccessHandler(function(data) {
+        var tbody = document.getElementById('leaderboard').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        data.forEach(function(item) {
+          var row = tbody.insertRow();
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          cell1.innerHTML = item.name;
+          cell2.innerHTML = item.score.toFixed(2);
         });
+      }).getLeaderboard();
     }
     
     loadLeaderboard();
   </script>
 </body>
 </html>
+
+
+
